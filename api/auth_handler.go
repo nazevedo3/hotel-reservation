@@ -55,14 +55,14 @@ func invalidCrednetials(c *fiber.Ctx) error {
 func (h *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 	var params AuthParams
 	if err := c.BodyParser(&params); err != nil {
-		return err
+		return ErrBadRequest()
 	}
 	user, err := h.userStore.GetUserByEmail(c.Context(), params.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return invalidCrednetials(c)
 		}
-		return err
+		return ErrResourceNotFound("user")
 	}
 	if !types.IsValidPassword(user.EncryptedPassword, params.Password) {
 		return invalidCrednetials(c)
